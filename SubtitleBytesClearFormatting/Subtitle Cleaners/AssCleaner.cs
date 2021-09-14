@@ -26,6 +26,7 @@ namespace SubtitleBytesClearFormatting.Cleaner
 
             SubtitleTextBytes = new byte[subtitleTextBytes.Length];
             Array.Copy(subtitleTextBytes, SubtitleTextBytes, subtitleTextBytes.Length);
+            TextWithoutFormatting = new List<byte>();
 
             int eventFormatLength = DetectEventsFormat(out long dialogueStart);
             // If file format doesn't contain '[Events] Format: ,' future algorithm will return empty array

@@ -7,10 +7,7 @@ namespace SubtitleBytesClearFormatting.Cleaner
         private byte[] subtitleTextBytes;
         private List<byte> textWithoutFormatting;
 
-        protected SubtitleFormatCleaner() 
-        {
-            TextWithoutFormatting = new List<byte>();
-        }
+        protected SubtitleFormatCleaner() { }
 
         protected byte[] SubtitleTextBytes
         {

@@ -24,6 +24,7 @@ namespace SubtitleBytesClearFormatting.Cleaner
 
             SubtitleTextBytes = new byte[subtitleTextBytes.Length];
             Array.Copy(subtitleTextBytes, SubtitleTextBytes, subtitleTextBytes.Length);
+            TextWithoutFormatting = new List<byte>();
 
             for (long i = 0; i < SubtitleTextBytes.Length; i++)
             {
