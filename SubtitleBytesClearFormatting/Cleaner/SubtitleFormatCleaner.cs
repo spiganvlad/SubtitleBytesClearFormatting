@@ -1,59 +1,69 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+
 
 namespace SubtitleBytesClearFormatting.Cleaner
 {
-    public abstract class SubtitleFormatCleaner
+    public abstract class SubtitleFormatCleaner : ISubtitleCleaner
     {
-        private byte[] subtitleTextBytes;
-        private List<byte> textWithoutFormatting;
+        private readonly ReadOnlyCollection<byte> subtitleTextBytes;
+        private readonly List<byte> textWithoutFormatting;
 
-        protected SubtitleFormatCleaner() { }
+        protected SubtitleFormatCleaner(byte[] subtitleTextBytes)
+        {
+            if (subtitleTextBytes == null)
+                throw new ArgumentNullException(nameof(subtitleTextBytes), "Subtitle bytes cannot be null.");
 
-        protected byte[] SubtitleTextBytes
+            this.subtitleTextBytes = Array.AsReadOnly<byte>(subtitleTextBytes);
+            textWithoutFormatting = new List<byte>();
+        }
+
+        protected ReadOnlyCollection<byte> SubtitleTextBytes
         {
             get { return subtitleTextBytes; }
-            set { subtitleTextBytes = value; }
         }
         protected List<byte> TextWithoutFormatting
         {
             get { return textWithoutFormatting; }
-            set { textWithoutFormatting = value; }
         }
 
-        public abstract byte[] DeleteFormatting(byte[] subtitleTextBytes);
+        public abstract byte[] DeleteFormatting();
+        protected abstract void InitializeTargetBytes();
 
         // Add characters to the list before an empty line
-        protected void GetUntilEmptyLine(ref long startPoint)
+        protected void AddUntilEmptyLine(ref int startpoint)
         {
-            while (++startPoint < subtitleTextBytes.Length)
+            while (++startpoint < subtitleTextBytes.Count)
             {
-                if (subtitleTextBytes[startPoint] == 13)
+                if (subtitleTextBytes[startpoint] == 13)
                 {
-                    if (startPoint + 3 < subtitleTextBytes.Length && subtitleTextBytes[startPoint + 1] == 10
-                        && subtitleTextBytes[startPoint + 2] == 13 && subtitleTextBytes[startPoint + 3] == 10)
+                    if (startpoint + 3 < subtitleTextBytes.Count && subtitleTextBytes[startpoint + 1] == 10
+                        && subtitleTextBytes[startpoint + 2] == 13 && subtitleTextBytes[startpoint + 3] == 10)
                     {
                         TextWithoutFormatting.Add(13);
                         TextWithoutFormatting.Add(10);
-                        startPoint += 3;
+                        startpoint += 3;
                         return;
                     }
-                    if (startPoint + 1 < subtitleTextBytes.Length && subtitleTextBytes[startPoint + 1] == 13)
+                    if (startpoint + 1 < subtitleTextBytes.Count && subtitleTextBytes[startpoint + 1] == 13)
                     {
                         TextWithoutFormatting.Add(13);
-                        startPoint++;
+                        startpoint++;
                         return;
                     }
                 }
 
-                if (subtitleTextBytes[startPoint] == 10 && startPoint + 1 < subtitleTextBytes.Length
-                    && subtitleTextBytes[startPoint + 1] == 10)
+                if (subtitleTextBytes[startpoint] == 10 && startpoint + 1 < subtitleTextBytes.Count
+                    && subtitleTextBytes[startpoint + 1] == 10)
                 {
                     TextWithoutFormatting.Add(10);
-                    startPoint++;
+                    startpoint++;
                     return;
                 }
 
-                TextWithoutFormatting.Add(SubtitleTextBytes[startPoint]);
+                TextWithoutFormatting.Add(SubtitleTextBytes[startpoint]);
             }
         }
     }

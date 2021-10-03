@@ -44,6 +44,7 @@ namespace SubtitleBytesClearFormatting.Cleaner
             for (long i = 0; i < textInBytes.Length; i++)
             {
                 if (IsTagFirstByte(textInBytes, tagsDictionary, ref i, out List<TxtTag> tagsList))
+                {
                     if (IsTag(textInBytes, i, tagsList, out int tagLength, out List<byte> replaceBytes))
                     {
                         if (replaceBytes != null)
@@ -51,6 +52,7 @@ namespace SubtitleBytesClearFormatting.Cleaner
                         i += tagLength;
                         continue;
                     }
+                }   
 
                 textWithoutTags.Add(textInBytes[i]);
             }

@@ -1,40 +1,38 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace SubtitleBytesClearFormatting.Cleaner
 {
-    public class SubCleaner : SubtitleFormatCleaner
+    public class SubCleaner : SubtitleFormatCleaner, ISubtitleCleaner
     {
-        private readonly byte[] frameTargetBytes;
+        private byte[] frameTargetBytes;
 
-        public SubCleaner() 
+        public SubCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
+
+        protected override void InitializeTargetBytes()
         {
             // Bytes of numbers: 48 = 0, 49 = 1, 50 = 2, 51 = 3, 52 = 4, 53 = 5, 54 = 6, 55 = 7, 56 = 8, 57 = 9
             frameTargetBytes = new byte[] { 48, 49, 50, 51, 52, 53, 54, 55, 56, 57 };
         }
 
-        public override byte[] DeleteFormatting(byte[] subtitleTextBytes)
+        public override byte[] DeleteFormatting()
         {
-            if (subtitleTextBytes == null)
-                throw new ArgumentNullException(nameof(subtitleTextBytes), "Sub subtitle bytes cannot be null.");
+            if (TextWithoutFormatting.Count > 0)
+                return TextWithoutFormatting.ToArray();
 
-            SubtitleTextBytes = new byte[subtitleTextBytes.Length];
-            Array.Copy(subtitleTextBytes, SubtitleTextBytes, subtitleTextBytes.Length);
-            TextWithoutFormatting = new List<byte>();
-
-            for (long i = 0; i < subtitleTextBytes.Length; i++)
+            InitializeTargetBytes();
+            for (int i = 0; i < SubtitleTextBytes.Count; i++)
             {
                 if (IsFrameTiming(ref i))
                 {
-                    GetTextAfterFrame(ref i);
+                    AddTextAfterFrame(ref i);
                 }
             }
 
             return TextWithoutFormatting.ToArray();
         }
 
-        private bool IsFrameTiming(ref long startPoint)
+        private bool IsFrameTiming(ref int startpoint)
         {
             // Bytes: 123 = {, 125 = }
             int leftBracketCount = 0;
@@ -42,12 +40,12 @@ namespace SubtitleBytesClearFormatting.Cleaner
 
             do
             {
-                if (SubtitleTextBytes[startPoint] == 123)
+                if (SubtitleTextBytes[startpoint] == 123)
                 {
                     leftBracketCount++;
                     continue;
                 }
-                if (SubtitleTextBytes[startPoint] == 125)
+                if (SubtitleTextBytes[startpoint] == 125)
                 {
                     rightBracketCount++;
                     if (leftBracketCount == 2 && rightBracketCount == 2)
@@ -55,25 +53,25 @@ namespace SubtitleBytesClearFormatting.Cleaner
                     continue;
                 }
 
-                if (SubtitleTextBytes[startPoint] == 13)
+                if (SubtitleTextBytes[startpoint] == 13)
                     return false;
-                if (SubtitleTextBytes[startPoint] == 10)
+                if (SubtitleTextBytes[startpoint] == 10)
                     return false;
 
-                if (!frameTargetBytes.Contains(SubtitleTextBytes[startPoint]))
+                if (!frameTargetBytes.Contains(SubtitleTextBytes[startpoint]))
                     return false;
-            } while (++startPoint < SubtitleTextBytes.Length);
+            } while (++startpoint < SubtitleTextBytes.Count);
 
             return false;
         }
 
-        private void GetTextAfterFrame(ref long startPoint)
+        private void AddTextAfterFrame(ref int startpoint)
         {
-            while (++startPoint < SubtitleTextBytes.Length)
+            while (++startpoint < SubtitleTextBytes.Count)
             {
-                if (SubtitleTextBytes[startPoint] == 13)
+                if (SubtitleTextBytes[startpoint] == 13)
                 {
-                    if (startPoint + 1 < SubtitleTextBytes.Length && SubtitleTextBytes[startPoint + 1] == 10)
+                    if (startpoint + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[startpoint + 1] == 10)
                     {
                         TextWithoutFormatting.Add(13);
                         TextWithoutFormatting.Add(10);
@@ -82,13 +80,13 @@ namespace SubtitleBytesClearFormatting.Cleaner
                     TextWithoutFormatting.Add(13);
                     return;
                 }
-                if (SubtitleTextBytes[startPoint] == 10)
+                if (SubtitleTextBytes[startpoint] == 10)
                 {
                     TextWithoutFormatting.Add(10);
                     return;
                 }
 
-                TextWithoutFormatting.Add(SubtitleTextBytes[startPoint]);
+                TextWithoutFormatting.Add(SubtitleTextBytes[startpoint]);
             }
         }
     }

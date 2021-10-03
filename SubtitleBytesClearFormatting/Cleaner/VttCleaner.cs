@@ -4,38 +4,37 @@ using System.Collections.Generic;
 
 namespace SubtitleBytesClearFormatting.Cleaner
 {
-    public class VttCleaner : SubtitleFormatCleaner
+    public class VttCleaner : SubtitleFormatCleaner, ISubtitleCleaner
     {
-        private readonly IReadOnlyCollection<byte> timingTargetBytes;
+        private IReadOnlyCollection<byte> timingTargetBytes;
 
-        public VttCleaner() 
+        public VttCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
+
+        protected override void InitializeTargetBytes()
         {
             // Bytes of timing: 48 = 0, 49 = 1, 50 = 2, 51 = 3, 52 = 4, 53 = 5,
             // 54 = 6, 55 = 7, 56 = 8, 57 = 9, 32 = ' ', 46 = ., 58 = :
             timingTargetBytes = new byte[] { 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 32, 46, 58 };
         }
 
-        public override byte[] DeleteFormatting(byte[] subtitleTextBytes)
+        public override byte[] DeleteFormatting()
         {
-            if (subtitleTextBytes == null)
-                throw new ArgumentNullException(nameof(subtitleTextBytes), "Vtt subtitle bytes cannot be null.");
+            if (TextWithoutFormatting.Count > 0)
+                return TextWithoutFormatting.ToArray();
 
-            SubtitleTextBytes = new byte[subtitleTextBytes.Length];
-            Array.Copy(subtitleTextBytes, SubtitleTextBytes, subtitleTextBytes.Length);
-            TextWithoutFormatting = new List<byte>();
-
-            for (long i = 0; i < SubtitleTextBytes.Length; i++)
+            InitializeTargetBytes();
+            for (int i = 0; i < SubtitleTextBytes.Count; i++)
             {
                 if (IsTiming(ref i))
                 {
-                    GetUntilEmptyLine(ref i);
+                    AddUntilEmptyLine(ref i);
                 }
             }
 
             return TextWithoutFormatting.ToArray();
         }
 
-        private bool IsTiming(ref long startPoint)
+        private bool IsTiming(ref int startpoint)
         {
             // Bytes of key: 45 = -, 62 = >
             int timingLineCount = 0;
@@ -45,38 +44,38 @@ namespace SubtitleBytesClearFormatting.Cleaner
             // Checking timing path
             do
             {
-                if (SubtitleTextBytes[startPoint] == 45)
+                if (SubtitleTextBytes[startpoint] == 45)
                 {
                     timingLineCount++;
                     continue;
                 }
-                if (SubtitleTextBytes[startPoint] == 62)
+                if (SubtitleTextBytes[startpoint] == 62)
                 {
                     timingPointerCount++;
                     continue;
                 }
-                if (SubtitleTextBytes[startPoint] == 32)
+                if (SubtitleTextBytes[startpoint] == 32)
                 {
                     spaceByteCount++;
                     if (spaceByteCount > 2)
                     {
-                        ScrollToLineEnd(ref startPoint);
+                        ScrollToLineEnd(ref startpoint);
                         break;
                     }
                     continue;
                 }
-                if (SubtitleTextBytes[startPoint] == 13)
+                if (SubtitleTextBytes[startpoint] == 13)
                 {
-                    if (startPoint + 1 < SubtitleTextBytes.Length && SubtitleTextBytes[startPoint + 1] == 10)
-                        startPoint++;
+                    if (startpoint + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[startpoint + 1] == 10)
+                        startpoint++;
                     break;
                 }
-                if (SubtitleTextBytes[startPoint] == 10)
+                if (SubtitleTextBytes[startpoint] == 10)
                     break;
 
-                if (!timingTargetBytes.Contains(SubtitleTextBytes[startPoint]))
+                if (!timingTargetBytes.Contains(SubtitleTextBytes[startpoint]))
                     return false;
-            } while (++startPoint < SubtitleTextBytes.Length);
+            } while (++startpoint < SubtitleTextBytes.Count);
 
             // Checking key (key = '-' '-' '>' or 45 45 62)
             if (timingLineCount == 2 && timingPointerCount == 1)
@@ -86,16 +85,16 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return false;
         }
 
-        private void ScrollToLineEnd(ref long startPoint)
+        private void ScrollToLineEnd(ref int startpoint)
         {
-            while (++startPoint < SubtitleTextBytes.Length)
+            while (++startpoint < SubtitleTextBytes.Count)
             {
-                if (SubtitleTextBytes[startPoint] == 10)
+                if (SubtitleTextBytes[startpoint] == 10)
                     break;
-                if (SubtitleTextBytes[startPoint] == 13)
+                if (SubtitleTextBytes[startpoint] == 13)
                 {
-                    if (startPoint + 1 < SubtitleTextBytes.Length && SubtitleTextBytes[startPoint + 1] == 10)
-                        startPoint++;
+                    if (startpoint + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[startpoint + 1] == 10)
+                        startpoint++;
                     break;
                 }
             }

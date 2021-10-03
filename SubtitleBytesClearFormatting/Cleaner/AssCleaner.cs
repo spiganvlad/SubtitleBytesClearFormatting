@@ -3,13 +3,15 @@ using System.Collections.Generic;
 
 namespace SubtitleBytesClearFormatting.Cleaner
 {
-    public class AssCleaner : SubtitleFormatCleaner
+    public class AssCleaner : SubtitleFormatCleaner, ISubtitleCleaner
     {
-        private readonly IReadOnlyCollection<byte> eventTargetBytes;
-        private readonly IReadOnlyCollection<byte> formatTargetBytes;
-        private readonly IReadOnlyCollection<byte> dialogueTargetBytes;
+        private IReadOnlyCollection<byte> eventTargetBytes;
+        private IReadOnlyCollection<byte> formatTargetBytes;
+        private IReadOnlyCollection<byte> dialogueTargetBytes;
 
-        public AssCleaner() 
+        public AssCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
+
+        protected override void InitializeTargetBytes()
         {
             // Bytes of string: "[Events]"
             eventTargetBytes = new byte[] { 91, 69, 118, 101, 110, 116, 115, 93 };
@@ -19,17 +21,15 @@ namespace SubtitleBytesClearFormatting.Cleaner
             dialogueTargetBytes = new byte[] { 68, 105, 97, 108, 111, 103, 117, 101, 58 };
         }
 
-        public override byte[] DeleteFormatting(byte[] subtitleTextBytes)
+        public override byte[] DeleteFormatting()
         {
-            if (subtitleTextBytes == null)
-                throw new ArgumentNullException(nameof(subtitleTextBytes), "Ass subtitle bytes cannot be null.");
+            if (TextWithoutFormatting.Count > 0)
+                return TextWithoutFormatting.ToArray();
 
-            SubtitleTextBytes = new byte[subtitleTextBytes.Length];
-            Array.Copy(subtitleTextBytes, SubtitleTextBytes, subtitleTextBytes.Length);
-            TextWithoutFormatting = new List<byte>();
+            InitializeTargetBytes();
+            int eventFormatLength = DetectEventsFormat(out int dialogueStart);
 
-            int eventFormatLength = DetectEventsFormat(out long dialogueStart);
-            // If file format doesn't contain '[Events] Format: ,' future algorithm will return empty array
+            // If file format doesn't contain '[Events] Format: ,' next algorithm will return empty array
             if (eventFormatLength == 0)
                 return Array.Empty<byte>();
 
@@ -37,13 +37,13 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return TextWithoutFormatting.ToArray();
         }
 
-        private int DetectEventsFormat(out long dialogueStart)
+        private int DetectEventsFormat(out int dialogueStart)
         {
-            for (dialogueStart = 0; dialogueStart < SubtitleTextBytes.Length; dialogueStart++)
+            for (dialogueStart = 0; dialogueStart < SubtitleTextBytes.Count; dialogueStart++)
             {
-                if (IsEventsWord(dialogueStart, out long shiftPoint) && IsFormatWord(dialogueStart + shiftPoint, ref shiftPoint))
+                if (IsEventsWord(dialogueStart, out int shiftpoint) && IsFormatWord(dialogueStart + shiftpoint, ref shiftpoint))
                 {
-                    dialogueStart += shiftPoint;
+                    dialogueStart += shiftpoint;
                     return EventsFormatLength(ref dialogueStart);
                 }
             }
@@ -51,62 +51,62 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return 0;
         }
 
-        private bool IsEventsWord(long startPoint, out long shiftPoint)
+        private bool IsEventsWord(int startpoint, out int shiftpoint)
         {
-            shiftPoint = eventTargetBytes.Count;
+            shiftpoint = eventTargetBytes.Count;
 
-            if (startPoint + eventTargetBytes.Count >= SubtitleTextBytes.Length)
+            if (startpoint + eventTargetBytes.Count >= SubtitleTextBytes.Count)
                 return false;
 
             foreach (byte targetByte in eventTargetBytes)
             {
-                if (SubtitleTextBytes[startPoint++] != targetByte)
+                if (SubtitleTextBytes[startpoint++] != targetByte)
                     return false;
             }
 
-            if (SubtitleTextBytes[startPoint] == 13)
+            if (SubtitleTextBytes[startpoint] == 13)
             {
-                if (startPoint + 1 < SubtitleTextBytes.Length && SubtitleTextBytes[startPoint + 1] == 10)
+                if (startpoint + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[startpoint + 1] == 10)
                 {
-                    shiftPoint += 2;
+                    shiftpoint += 2;
                     return true;
                 }
-                shiftPoint++;
+                shiftpoint++;
                 return true;
             }
-            if (SubtitleTextBytes[startPoint] == 10)
+            if (SubtitleTextBytes[startpoint] == 10)
             {
-                shiftPoint++;
+                shiftpoint++;
                 return true;
             }
 
             return false;
         }
 
-        private bool IsFormatWord(long startPoint, ref long shiftPoint)
+        private bool IsFormatWord(int startpoint, ref int shiftpoint)
         {
-            shiftPoint += formatTargetBytes.Count;
+            shiftpoint += formatTargetBytes.Count;
 
-            if (startPoint + formatTargetBytes.Count - 1 >= SubtitleTextBytes.Length)
+            if (startpoint + formatTargetBytes.Count - 1 >= SubtitleTextBytes.Count)
                 return false;
 
             foreach (byte targetByte in formatTargetBytes)
             {
-                if (SubtitleTextBytes[startPoint++] != targetByte)
+                if (SubtitleTextBytes[startpoint++] != targetByte)
                     return false;
             }
 
             return true;
         }
 
-        private int EventsFormatLength(ref long dialogueStart)
+        private int EventsFormatLength(ref int dialogueStart)
         {
             int eventFormatLength = 0;
-            while (++dialogueStart < SubtitleTextBytes.Length)
+            while (++dialogueStart < SubtitleTextBytes.Count)
             {
                 if (SubtitleTextBytes[dialogueStart] == 13)
                 {
-                    if (dialogueStart + 1 < SubtitleTextBytes.Length && SubtitleTextBytes[dialogueStart] == 10)
+                    if (dialogueStart + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[dialogueStart] == 10)
                     {
                         dialogueStart += 2;
                         break;
@@ -126,14 +126,14 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return eventFormatLength;
         }
 
-        private void DeleteDialogueFormatting(long startPoint, int eventFormatLength)
+        private void DeleteDialogueFormatting(int startpoint, int eventFormatLength)
         {
-            for (long i = startPoint; i < SubtitleTextBytes.Length; i++)
+            for (int i = startpoint; i < SubtitleTextBytes.Count; i++)
             {
                 if (IsDialogueLine(i))
                 {
                     int formatCount = 0;
-                    while (++i < SubtitleTextBytes.Length)
+                    while (++i < SubtitleTextBytes.Count)
                     {
                         if (SubtitleTextBytes[i] == 13)
                             break;
@@ -145,7 +145,7 @@ namespace SubtitleBytesClearFormatting.Cleaner
                             formatCount++;
                             if (formatCount == eventFormatLength)
                             {
-                                GetDialogueText(ref i);
+                                AddDialogueText(ref i);
                                 break;
                             }
                         }
@@ -154,27 +154,27 @@ namespace SubtitleBytesClearFormatting.Cleaner
             }
         }
 
-        private bool IsDialogueLine(long startPoint)
+        private bool IsDialogueLine(int startpoint)
         {
-            if (startPoint + dialogueTargetBytes.Count - 1 >= SubtitleTextBytes.Length)
+            if (startpoint + dialogueTargetBytes.Count - 1 >= SubtitleTextBytes.Count)
                 return false;
 
             foreach (byte targetByte in dialogueTargetBytes)
             {
-                if (SubtitleTextBytes[startPoint++] != targetByte)
+                if (SubtitleTextBytes[startpoint++] != targetByte)
                     return false;
             }
 
             return true;
         }
 
-        private void GetDialogueText(ref long startPoint)
+        private void AddDialogueText(ref int startpoint)
         {
-            while (++startPoint < SubtitleTextBytes.Length)
+            while (++startpoint < SubtitleTextBytes.Count)
             {
-                if (SubtitleTextBytes[startPoint] == 13)
+                if (SubtitleTextBytes[startpoint] == 13)
                 {
-                    if (startPoint + 1 < SubtitleTextBytes.Length && SubtitleTextBytes[startPoint + 1] == 10)
+                    if (startpoint + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[startpoint + 1] == 10)
                     {
                         TextWithoutFormatting.Add(13);
                         TextWithoutFormatting.Add(10);
@@ -184,13 +184,13 @@ namespace SubtitleBytesClearFormatting.Cleaner
                     return;
                 }
 
-                if (SubtitleTextBytes[startPoint] == 10)
+                if (SubtitleTextBytes[startpoint] == 10)
                 {
                     TextWithoutFormatting.Add(10);
                     return;
                 }
 
-                TextWithoutFormatting.Add(SubtitleTextBytes[startPoint]);
+                TextWithoutFormatting.Add(SubtitleTextBytes[startpoint]);
             }
         }
     }

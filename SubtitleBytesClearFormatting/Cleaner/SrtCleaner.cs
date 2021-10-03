@@ -4,90 +4,89 @@ using System.Collections.Generic;
 
 namespace SubtitleBytesClearFormatting.Cleaner
 {
-    public class SrtCleaner : SubtitleFormatCleaner
+    public class SrtCleaner : SubtitleFormatCleaner, ISubtitleCleaner
     {
-        private readonly IReadOnlyCollection<byte> numberTargetBytes;
-        private readonly IReadOnlyCollection<byte> timingTargetBytes;
+        private IReadOnlyCollection<byte> numberTargetBytes;
+        private IReadOnlyCollection<byte> timingTargetBytes;
 
-        public SrtCleaner() 
+        public SrtCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
+
+        protected override void InitializeTargetBytes()
         {
             //Bytes of numbers: 48 = 0, 49 = 1, 50 = 2, 51 = 3, 52 = 4, 53 = 5, 54 = 6, 55 = 7, 56 = 8, 57 = 9
             numberTargetBytes = new byte[] { 48, 49, 50, 51, 52, 53, 54, 55, 56, 57 };
             //Bytes of timing: 32 = ' ', 44 = ,, 58 = :
             timingTargetBytes = new byte[] { 32, 44, 58 };
         }
-        
-        public override byte[] DeleteFormatting(byte[] subtitleTextBytes)
+
+        public override byte[] DeleteFormatting()
         {
-            if (subtitleTextBytes == null)
-                throw new ArgumentNullException(nameof(subtitleTextBytes), "Srt subtitle bytes cannot be null.");
+            if (TextWithoutFormatting.Count > 0)
+                return TextWithoutFormatting.ToArray();
 
-            SubtitleTextBytes = new byte[subtitleTextBytes.Length];
-            Array.Copy(subtitleTextBytes, SubtitleTextBytes, subtitleTextBytes.Length);
-            TextWithoutFormatting = new List<byte>();
-
-            for (long i = 0; i < SubtitleTextBytes.Length; i++)
+            InitializeTargetBytes();
+            for (int i = 0; i < SubtitleTextBytes.Count; i++)
             {
                 if (IsTimingNumber(ref i))
                 {
                     if (IsTiming(ref i))
-                        GetUntilEmptyLine(ref i);
+                        AddUntilEmptyLine(ref i);
                 }
             }
 
             return TextWithoutFormatting.ToArray();
         }
 
-        private bool IsTimingNumber(ref long startPoint)
+        private bool IsTimingNumber(ref int startpoint)
         {
             do
             {
-                if (SubtitleTextBytes[startPoint] == 13)
+                if (SubtitleTextBytes[startpoint] == 13)
                 {
-                    if (startPoint + 1 < SubtitleTextBytes.Length && SubtitleTextBytes[startPoint + 1] == 10)
-                        startPoint++;
+                    if (startpoint + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[startpoint + 1] == 10)
+                        startpoint++;
                     return true;
                 }
-                if (SubtitleTextBytes[startPoint] == 10)
+                if (SubtitleTextBytes[startpoint] == 10)
                     return true;
-                if (!numberTargetBytes.Contains(SubtitleTextBytes[startPoint]))
+                if (!numberTargetBytes.Contains(SubtitleTextBytes[startpoint]))
                     return false;
-            } while (startPoint++ < SubtitleTextBytes.Length);
+            } while (startpoint++ < SubtitleTextBytes.Count);
 
 
             return false;
         }
 
-        private bool IsTiming(ref long startPoint)
+        private bool IsTiming(ref int startpoint)
         {
             // Bytes timing key: 45 = -, 62 = >
             int timingLineCount = 0;
             int timingPointerCount = 0;
 
             // Checking timing path
-            while (++startPoint < SubtitleTextBytes.Length)
+            while (++startpoint < SubtitleTextBytes.Count)
             {
-                if (SubtitleTextBytes[startPoint] == 45)
+                if (SubtitleTextBytes[startpoint] == 45)
                 {
                     timingLineCount++;
                     continue;
                 }
-                if (SubtitleTextBytes[startPoint] == 62)
+                if (SubtitleTextBytes[startpoint] == 62)
                 {
                     timingPointerCount++;
                     continue;
                 }  
-                if (SubtitleTextBytes[startPoint] == 13)
+                if (SubtitleTextBytes[startpoint] == 13)
                 {
-                    if (startPoint + 1 < SubtitleTextBytes.Length && SubtitleTextBytes[startPoint + 1] == 10)
-                        startPoint++;
+                    if (startpoint + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[startpoint + 1] == 10)
+                        startpoint++;
                     break;
                 }
-                if (SubtitleTextBytes[startPoint] == 10)
+                if (SubtitleTextBytes[startpoint] == 10)
                     break;
 
-                if (!(numberTargetBytes.Contains(SubtitleTextBytes[startPoint]) || 
-                    timingTargetBytes.Contains(SubtitleTextBytes[startPoint])))
+                if (!(numberTargetBytes.Contains(SubtitleTextBytes[startpoint]) || 
+                    timingTargetBytes.Contains(SubtitleTextBytes[startpoint])))
                     return false;
             }
 
