@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SubtitleBytesClearFormatting.Cleaner
 {
-    public class SubCleaner : SubtitleFormatCleaner, ISubtitleCleaner
+    public class SubCleaner : SubtitleFormatCleaner, ISubtitleCleaner, ISubtitleCleanerAsync
     {
         private byte[] frameTargetBytes;
 
@@ -30,6 +31,11 @@ namespace SubtitleBytesClearFormatting.Cleaner
             }
 
             return TextWithoutFormatting.ToArray();
+        }
+
+        public override async Task<byte[]> DeleteFormattingAsync()
+        {
+            return await base.DeleteFormattingAsync();
         }
 
         private bool IsFrameTiming(ref int startpoint)

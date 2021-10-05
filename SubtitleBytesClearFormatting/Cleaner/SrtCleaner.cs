@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SubtitleBytesClearFormatting.Cleaner
 {
-    public class SrtCleaner : SubtitleFormatCleaner, ISubtitleCleaner
+    public class SrtCleaner : SubtitleFormatCleaner, ISubtitleCleaner, ISubtitleCleanerAsync
     {
         private IReadOnlyCollection<byte> numberTargetBytes;
         private IReadOnlyCollection<byte> timingTargetBytes;
@@ -35,6 +36,11 @@ namespace SubtitleBytesClearFormatting.Cleaner
             }
 
             return TextWithoutFormatting.ToArray();
+        }
+
+        public override async Task<byte[]> DeleteFormattingAsync()
+        {
+            return await base.DeleteFormattingAsync();
         }
 
         private bool IsTimingNumber(ref int startpoint)

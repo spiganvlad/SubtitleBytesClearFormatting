@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using SubtitleBytesClearFormatting.TagsGenerate;
 
@@ -32,6 +33,11 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return textInOneLine.ToArray();
         }
 
+        public static async Task<byte[]> ToOneLineAsync(byte[] textInBytes)
+        {
+            return await Task.Run(() => ToOneLine(textInBytes));
+        }
+
         public static byte[] DeleteTags(byte[] textInBytes, Dictionary<byte, List<TxtTag>> tagsDictionary)
         {
             if (textInBytes == null)
@@ -60,7 +66,12 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return textWithoutTags.ToArray();
         }
 
-        public static bool IsTagFirstByte(byte[] textInBytes, Dictionary<byte, List<TxtTag>> tagDictionary,
+        public static async Task<byte[]> DeleteTagsAsync(byte[] textInBytes, Dictionary<byte, List<TxtTag>> tagsDictionary)
+        {
+            return await Task.Run(() => DeleteTags(textInBytes, tagsDictionary));
+        }
+
+        private static bool IsTagFirstByte(byte[] textInBytes, Dictionary<byte, List<TxtTag>> tagDictionary,
             ref long startpoint, out List<TxtTag> tagsList)
         {
             tagsList = null;

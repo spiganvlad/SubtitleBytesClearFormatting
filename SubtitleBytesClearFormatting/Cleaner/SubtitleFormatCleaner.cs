@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -6,10 +7,11 @@ using System.Collections.ObjectModel;
 
 namespace SubtitleBytesClearFormatting.Cleaner
 {
-    public abstract class SubtitleFormatCleaner : ISubtitleCleaner
+    public abstract class SubtitleFormatCleaner : ISubtitleCleaner, ISubtitleCleanerAsync
     {
         private readonly ReadOnlyCollection<byte> subtitleTextBytes;
         private readonly List<byte> textWithoutFormatting;
+        private bool isCleanerWorking;
 
         protected SubtitleFormatCleaner(byte[] subtitleTextBytes)
         {
@@ -18,6 +20,7 @@ namespace SubtitleBytesClearFormatting.Cleaner
 
             this.subtitleTextBytes = Array.AsReadOnly<byte>(subtitleTextBytes);
             textWithoutFormatting = new List<byte>();
+            isCleanerWorking = false;
         }
 
         protected ReadOnlyCollection<byte> SubtitleTextBytes
@@ -28,8 +31,24 @@ namespace SubtitleBytesClearFormatting.Cleaner
         {
             get { return textWithoutFormatting; }
         }
+        protected bool IsCleanerWorking
+        {
+            get { return isCleanerWorking; }
+            set { isCleanerWorking = value; }
+        }
 
         public abstract byte[] DeleteFormatting();
+        public virtual async Task<byte[]> DeleteFormattingAsync()
+        {
+            while (IsCleanerWorking)
+                await Task.Delay(50);
+
+            IsCleanerWorking = true;
+            byte[] resultBytes = await Task.Run(() => DeleteFormatting());
+            IsCleanerWorking = false;
+
+            return resultBytes;
+        }
         protected abstract void InitializeTargetBytes();
 
         // Add characters to the list before an empty line

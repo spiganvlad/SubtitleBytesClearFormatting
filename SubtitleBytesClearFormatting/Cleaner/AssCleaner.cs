@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 
 namespace SubtitleBytesClearFormatting.Cleaner
 {
-    public class AssCleaner : SubtitleFormatCleaner, ISubtitleCleaner
+    public class AssCleaner : SubtitleFormatCleaner, ISubtitleCleaner, ISubtitleCleanerAsync
     {
         private IReadOnlyCollection<byte> eventTargetBytes;
         private IReadOnlyCollection<byte> formatTargetBytes;
@@ -35,6 +36,11 @@ namespace SubtitleBytesClearFormatting.Cleaner
 
             DeleteDialogueFormatting(dialogueStart, eventFormatLength);
             return TextWithoutFormatting.ToArray();
+        }
+
+        public override async Task<byte[]> DeleteFormattingAsync()
+        {
+            return await base.DeleteFormattingAsync();
         }
 
         private int DetectEventsFormat(out int dialogueStart)
