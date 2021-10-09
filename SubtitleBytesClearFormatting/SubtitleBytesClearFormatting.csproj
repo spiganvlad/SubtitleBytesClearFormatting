@@ -5,15 +5,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="SubtitleTags\AssTags.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="SubtitleTags\BasicTags.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="SubtitleTags\SubTags.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Remove="SubtitleTags\AssTags.xml" />
+    <None Remove="SubtitleTags\BasicTags.xml" />
+    <None Remove="SubtitleTags\SubTags.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SubtitleTags\AssTags.xml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SubtitleTags\BasicTags.xml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SubtitleTags\SubTags.xml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

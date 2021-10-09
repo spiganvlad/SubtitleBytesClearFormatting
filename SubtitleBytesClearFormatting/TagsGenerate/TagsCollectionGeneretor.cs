@@ -4,6 +4,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 using System.Collections.Generic;
 
 namespace SubtitleBytesClearFormatting.TagsGenerate
@@ -11,30 +12,18 @@ namespace SubtitleBytesClearFormatting.TagsGenerate
     public static class TagsCollectionGeneretor
     {
         public static Dictionary<byte, List<TxtTag>> GetBasicTags()
-        {   
-            string path = Directory.GetCurrentDirectory() + @"\SubtitleTags\BasicTags.xml";
-            if (File.Exists(path))
-                return ExtractTagsFromXml(path);
-
-            throw new FileNotFoundException("File BasicTags.xml not found.", path);
+        {
+            return ExtractTagsFromXml(Assembly.GetExecutingAssembly().GetManifestResourceStream(GetEmbeddedXmlPath("BasicTags.xml")));
         }
 
         public static Dictionary<byte, List<TxtTag>> GetSubSpecificTags()
         {
-            string path = Directory.GetCurrentDirectory() + @"\SubtitleTags\SubTags.xml";
-            if (File.Exists(path))
-                return ExtractTagsFromXml(path);
-
-            throw new FileNotFoundException("File SubTags.xml not found.", path);
+            return ExtractTagsFromXml(Assembly.GetExecutingAssembly().GetManifestResourceStream(GetEmbeddedXmlPath("SubTags.xml")));
         }
 
         public static Dictionary<byte, List<TxtTag>> GetAssSpecificTags()
-        {   
-            string path = Directory.GetCurrentDirectory() + @"\SubtitleTags\AssTags.xml";
-            if (File.Exists(path))
-                return ExtractTagsFromXml(path);
-
-            throw new FileNotFoundException("File AssTags.xml not found.", path);
+        {
+            return ExtractTagsFromXml(Assembly.GetExecutingAssembly().GetManifestResourceStream(GetEmbeddedXmlPath("AssTags.xml")));
         }
 
         public static Dictionary<byte, List<TxtTag>> GetTagsFromXml(string path)
@@ -48,10 +37,32 @@ namespace SubtitleBytesClearFormatting.TagsGenerate
             throw new FileNotFoundException("Xml file not found.", path);
         }
 
+        private static string GetEmbeddedXmlPath(string fileName)
+        {
+            string[] filePaths = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+
+            foreach (string path in filePaths)
+            {
+                if (path.EndsWith(fileName))
+                    return path;
+            }
+
+            throw new FileNotFoundException("Embedded xml file was not found in assembly.", fileName);
+        }
+
+        private static Dictionary<byte, List<TxtTag>> ExtractTagsFromXml(Stream stream)
+        {
+            return ExtractTagsFromXml(XDocument.Load(stream));
+        }
+
         private static Dictionary<byte, List<TxtTag>> ExtractTagsFromXml(string path)
         {
+            return ExtractTagsFromXml(XDocument.Load(path));
+        }
+
+        private static Dictionary<byte, List<TxtTag>> ExtractTagsFromXml(XDocument xDoc)
+        {
             Dictionary<byte, List<TxtTag>> tagGroup = new();
-            XDocument xDoc = XDocument.Load(path);
 
             if (xDoc.Element("tags") == null)
                 throw new XmlException("Xml root \"tags\" not found.");
