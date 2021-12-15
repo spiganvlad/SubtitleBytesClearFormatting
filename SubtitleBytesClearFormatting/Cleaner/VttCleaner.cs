@@ -7,11 +7,11 @@ namespace SubtitleBytesClearFormatting.Cleaner
 {
     public class VttCleaner : SubtitleFormatCleaner, ISubtitleCleaner, ISubtitleCleanerAsync
     {
-        private IReadOnlyCollection<byte> timingTargetBytes;
+        private static readonly IReadOnlyCollection<byte> timingTargetBytes;
 
         public VttCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
 
-        protected override void InitializeTargetBytes()
+        static VttCleaner()
         {
             // Bytes of timing: 48 = 0, 49 = 1, 50 = 2, 51 = 3, 52 = 4, 53 = 5,
             // 54 = 6, 55 = 7, 56 = 8, 57 = 9, 32 = ' ', 46 = ., 58 = :
@@ -23,7 +23,6 @@ namespace SubtitleBytesClearFormatting.Cleaner
             if (TextWithoutFormatting.Count > 0)
                 return TextWithoutFormatting.ToArray();
 
-            InitializeTargetBytes();
             for (int i = 0; i < SubtitleTextBytes.Count; i++)
             {
                 if (IsTiming(ref i))

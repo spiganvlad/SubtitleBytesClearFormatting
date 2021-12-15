@@ -6,13 +6,13 @@ namespace SubtitleBytesClearFormatting.Cleaner
 {
     public class AssCleaner : SubtitleFormatCleaner, ISubtitleCleaner, ISubtitleCleanerAsync
     {
-        private IReadOnlyCollection<byte> eventTargetBytes;
-        private IReadOnlyCollection<byte> formatTargetBytes;
-        private IReadOnlyCollection<byte> dialogueTargetBytes;
+        private static readonly IReadOnlyCollection<byte> eventTargetBytes;
+        private static readonly IReadOnlyCollection<byte> formatTargetBytes;
+        private static readonly IReadOnlyCollection<byte> dialogueTargetBytes;
 
         public AssCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
 
-        protected override void InitializeTargetBytes()
+        static AssCleaner()
         {
             // Bytes of string: "[Events]"
             eventTargetBytes = new byte[] { 91, 69, 118, 101, 110, 116, 115, 93 };
@@ -27,7 +27,6 @@ namespace SubtitleBytesClearFormatting.Cleaner
             if (TextWithoutFormatting.Count > 0)
                 return TextWithoutFormatting.ToArray();
 
-            InitializeTargetBytes();
             int eventFormatLength = DetectEventsFormat(out int dialogueStart);
 
             // If file format doesn't contain '[Events] Format: ,' next algorithm will return empty array

@@ -7,12 +7,12 @@ namespace SubtitleBytesClearFormatting.Cleaner
 {
     public class SrtCleaner : SubtitleFormatCleaner, ISubtitleCleaner, ISubtitleCleanerAsync
     {
-        private IReadOnlyCollection<byte> numberTargetBytes;
-        private IReadOnlyCollection<byte> timingTargetBytes;
+        private static readonly IReadOnlyCollection<byte> numberTargetBytes;
+        private static readonly IReadOnlyCollection<byte> timingTargetBytes;
 
         public SrtCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
 
-        protected override void InitializeTargetBytes()
+        static SrtCleaner()
         {
             //Bytes of numbers: 48 = 0, 49 = 1, 50 = 2, 51 = 3, 52 = 4, 53 = 5, 54 = 6, 55 = 7, 56 = 8, 57 = 9
             numberTargetBytes = new byte[] { 48, 49, 50, 51, 52, 53, 54, 55, 56, 57 };
@@ -25,7 +25,6 @@ namespace SubtitleBytesClearFormatting.Cleaner
             if (TextWithoutFormatting.Count > 0)
                 return TextWithoutFormatting.ToArray();
 
-            InitializeTargetBytes();
             for (int i = 0; i < SubtitleTextBytes.Count; i++)
             {
                 if (IsTimingNumber(ref i))

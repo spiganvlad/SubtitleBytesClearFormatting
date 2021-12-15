@@ -7,11 +7,11 @@ namespace SubtitleBytesClearFormatting.Cleaner
 {
     public class SbvCleaner : SubtitleFormatCleaner, ISubtitleCleaner, ISubtitleCleanerAsync
     {
-        private IReadOnlyCollection<byte> numbersTargetBytes;
+        private static readonly IReadOnlyCollection<byte> numbersTargetBytes;
 
         public SbvCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
 
-        protected override void InitializeTargetBytes()
+        static SbvCleaner()
         {
             // Bytes of numbers: 48 = 0, 49 = 1, 50 = 2, 51 = 3, 52 = 4, 53 = 5,
             // 54 = 6, 55 = 7, 56 = 8, 57 = 9,  58 = :, 46 = .
@@ -23,7 +23,6 @@ namespace SubtitleBytesClearFormatting.Cleaner
             if (TextWithoutFormatting.Count > 0)
                 return TextWithoutFormatting.ToArray();
 
-            InitializeTargetBytes();
             for (int i = 0; i < SubtitleTextBytes.Count; i++)
             {
                 if (IsTiming(ref i))

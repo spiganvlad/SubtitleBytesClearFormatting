@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-
-
 namespace SubtitleBytesClearFormatting.Cleaner
 {
     public abstract class SubtitleFormatCleaner : ISubtitleCleaner, ISubtitleCleanerAsync
@@ -49,9 +47,8 @@ namespace SubtitleBytesClearFormatting.Cleaner
 
             return resultBytes;
         }
-        protected abstract void InitializeTargetBytes();
 
-        // Add characters to the list before an empty line
+        // Add characters to the textWithoutFormatting list before an empty line
         protected void AddUntilEmptyLine(ref int startpoint)
         {
             while (++startpoint < subtitleTextBytes.Count)
