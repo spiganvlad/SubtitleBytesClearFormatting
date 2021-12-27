@@ -9,6 +9,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
     {
         private static readonly IReadOnlyCollection<byte> timingTargetBytes;
 
+        /// <summary>
+        /// Creates an instance of the class
+        /// </summary>
+        /// <param name="subtitleTextBytes">Bytes representing vtt structures and text after them</param>
         public VttCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
 
         static VttCleaner()
@@ -18,6 +22,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
             timingTargetBytes = new byte[] { 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 32, 46, 58 };
         }
 
+        /// <summary>
+        /// Extracts and returns bytes after vtt formatting structures
+        /// </summary>
+        /// <returns>Returns extracted bytes</returns>
         public override byte[] DeleteFormatting()
         {
             if (TextWithoutFormatting.Count > 0)
@@ -34,6 +42,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return TextWithoutFormatting.ToArray();
         }
 
+        /// <summary>
+        /// Extracts and returns bytes after vtt formatting structures in async mode
+        /// </summary>
+        /// <returns>Returns extracted bytes</returns>
         public override async Task<byte[]> DeleteFormattingAsync()
         {
             return await base.DeleteFormattingAsync();

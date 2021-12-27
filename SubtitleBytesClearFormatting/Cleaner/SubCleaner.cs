@@ -8,6 +8,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
     {
         private static readonly byte[] frameTargetBytes;
 
+        /// <summary>
+        /// Creates an instance of the class
+        /// </summary>
+        /// <param name="subtitleTextBytes">Bytes representing sub structures and text after them</param>
         public SubCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
 
         static SubCleaner()
@@ -16,6 +20,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
             frameTargetBytes = new byte[] { 48, 49, 50, 51, 52, 53, 54, 55, 56, 57 };
         }
 
+        /// <summary>
+        /// Extracts and returns bytes after sub formatting structures
+        /// </summary>
+        /// <returns>Returns extracted bytes</returns>
         public override byte[] DeleteFormatting()
         {
             if (TextWithoutFormatting.Count > 0)
@@ -32,6 +40,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return TextWithoutFormatting.ToArray();
         }
 
+        /// <summary>
+        /// Extracts and returns bytes after sub formatting structures in async mode
+        /// </summary>
+        /// <returns>Returns extracted bytes</returns>
         public override async Task<byte[]> DeleteFormattingAsync()
         {
             return await base.DeleteFormattingAsync();

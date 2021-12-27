@@ -10,6 +10,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
         private static readonly IReadOnlyCollection<byte> numberTargetBytes;
         private static readonly IReadOnlyCollection<byte> timingTargetBytes;
 
+        /// <summary>
+        /// Creates an instance of the class
+        /// </summary>
+        /// <param name="subtitleTextBytes">Bytes representing srt structures and text after them</param>
         public SrtCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
 
         static SrtCleaner()
@@ -20,6 +24,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
             timingTargetBytes = new byte[] { 32, 44, 58 };
         }
 
+        /// <summary>
+        /// Extracts and returns bytes after srt formatting structures
+        /// </summary>
+        /// <returns>Returns extracted bytes</returns>
         public override byte[] DeleteFormatting()
         {
             if (TextWithoutFormatting.Count > 0)
@@ -37,6 +45,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return TextWithoutFormatting.ToArray();
         }
 
+        /// <summary>
+        /// Extracts and returns bytes after srt formatting structures in async mode
+        /// </summary>
+        /// <returns>Returns extracted bytes</returns>
         public override async Task<byte[]> DeleteFormattingAsync()
         {
             return await base.DeleteFormattingAsync();

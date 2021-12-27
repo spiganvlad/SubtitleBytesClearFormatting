@@ -10,6 +10,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
         private static readonly IReadOnlyCollection<byte> formatTargetBytes;
         private static readonly IReadOnlyCollection<byte> dialogueTargetBytes;
 
+        /// <summary>
+        /// Creates an instance of the class
+        /// </summary>
+        /// <param name="subtitleTextBytes">Bytes representing ass structures and text after them</param>
         public AssCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
 
         static AssCleaner()
@@ -22,6 +26,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
             dialogueTargetBytes = new byte[] { 68, 105, 97, 108, 111, 103, 117, 101, 58 };
         }
 
+        /// <summary>
+        /// Extracts and returns bytes after ass formatting structures
+        /// </summary>
+        /// <returns>Returns extracted bytes</returns>
         public override byte[] DeleteFormatting()
         {
             if (TextWithoutFormatting.Count > 0)
@@ -37,6 +45,10 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return TextWithoutFormatting.ToArray();
         }
 
+        /// <summary>
+        /// Extracts and returns bytes after ass formatting structures in async mode
+        /// </summary>
+        /// <returns>Returns extracted bytes</returns>
         public override async Task<byte[]> DeleteFormattingAsync()
         {
             return await base.DeleteFormattingAsync();

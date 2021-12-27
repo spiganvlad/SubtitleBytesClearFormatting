@@ -11,21 +11,35 @@ namespace SubtitleBytesClearFormatting.TagsGenerate
 {
     public static class TagsCollectionGeneretor
     {
+        /// <summary>
+        /// Returns a dictionary of basic subtitle tags
+        /// </summary>
         public static Dictionary<byte, List<TxtTag>> GetBasicTags()
         {
             return ExtractTagsFromXml(Assembly.GetExecutingAssembly().GetManifestResourceStream(GetEmbeddedXmlPath("BasicTags.xml")));
         }
 
+        /// <summary>
+        /// Returns a dictionary of sub specific subtitle tags
+        /// </summary>
         public static Dictionary<byte, List<TxtTag>> GetSubSpecificTags()
         {
             return ExtractTagsFromXml(Assembly.GetExecutingAssembly().GetManifestResourceStream(GetEmbeddedXmlPath("SubTags.xml")));
         }
 
+        /// <summary>
+        /// Returns a dictionary of ass specific subtitle tags
+        /// </summary>
         public static Dictionary<byte, List<TxtTag>> GetAssSpecificTags()
         {
             return ExtractTagsFromXml(Assembly.GetExecutingAssembly().GetManifestResourceStream(GetEmbeddedXmlPath("AssTags.xml")));
         }
 
+        /// <summary>
+        /// Extract subtitle tags from xml file
+        /// </summary>
+        /// <param name="path">Path to xml file</param>
+        /// <returns>Returns a dictionary of subtitle tags</returns>
         public static Dictionary<byte, List<TxtTag>> GetTagsFromXml(string path)
         {
             if (String.IsNullOrWhiteSpace(path))

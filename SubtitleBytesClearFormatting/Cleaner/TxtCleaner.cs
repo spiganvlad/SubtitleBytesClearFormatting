@@ -7,6 +7,11 @@ namespace SubtitleBytesClearFormatting.Cleaner
 {
     public static class TxtCleaner
     {
+        /// <summary>
+        /// Converts bytes by replacing newline with white space
+        /// </summary>
+        /// <param name="textInBytes">Bytes with newlines</param>
+        /// <returns>Returns converted bytes</returns>
         public static byte[] ToOneLine(byte[] textInBytes)
         {
             if (textInBytes == null)
@@ -33,11 +38,22 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return textInOneLine.ToArray();
         }
 
+        /// <summary>
+        /// Converts bytes by replacing newline with white space in async mode
+        /// </summary>
+        /// <param name="textInBytes">Bytes with newlines</param>
+        /// <returns>Returns converted bytes</returns>
         public static async Task<byte[]> ToOneLineAsync(byte[] textInBytes)
         {
             return await Task.Run(() => ToOneLine(textInBytes));
         }
 
+        /// <summary>
+        /// Convert bytes by replacing subtitle tags with target characters
+        /// </summary>
+        /// <param name="textInBytes">Bytes with subtitle tags</param>
+        /// <param name="tagsDictionary">Use SubtitleBytesClearFormatting.TagsGenerate.TagsCollectionGeneretor to get a dictionary of tags</param>
+        /// <returns>Returns converted bytes</returns>
         public static byte[] DeleteTags(byte[] textInBytes, Dictionary<byte, List<TxtTag>> tagsDictionary)
         {
             if (textInBytes == null)
@@ -66,6 +82,12 @@ namespace SubtitleBytesClearFormatting.Cleaner
             return textWithoutTags.ToArray();
         }
 
+        /// <summary>
+        /// Convert bytes by replacing subtitle tags with target characters in async mode
+        /// </summary>
+        /// <param name="textInBytes">Bytes with subtitle tags</param>
+        /// <param name="tagsDictionary">Use SubtitleBytesClearFormatting.TagsGenerate.TagsCollectionGeneretor to get a dictionary of tags</param>
+        /// <returns>Returns converted bytes</returns>
         public static async Task<byte[]> DeleteTagsAsync(byte[] textInBytes, Dictionary<byte, List<TxtTag>> tagsDictionary)
         {
             return await Task.Run(() => DeleteTags(textInBytes, tagsDictionary));
