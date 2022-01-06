@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/Cute4aika/SubtitleBytesClearFormatting</RepositoryUrl>
+    <Description>.Net 5 library that allows to extract bytes after subtitle formatting structures and to remove bytes representing subtitle tags</Description>
+    <PackageReleaseNotes>Stable version</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

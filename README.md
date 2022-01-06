@@ -4,7 +4,7 @@
 Supports extraction from 5 types of subtitles: ass, sbv, srt, sub, vtt.
 
 ## Installation
-Package will be added soon.
+To install, use the nuget package (package section on the right side of the page).
 
 ## Cleaner usage
 All cleaners work in the same way. They look for subtitle structures and extract the text after them. Let's look at the example of the srt file.
