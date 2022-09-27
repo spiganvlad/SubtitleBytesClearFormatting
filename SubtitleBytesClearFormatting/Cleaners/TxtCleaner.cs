@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using SubtitleBytesClearFormatting.TagsGenerate;
 
-namespace SubtitleBytesClearFormatting.Cleaner
+namespace SubtitleBytesClearFormatting.Cleaners
 {
     public static class TxtCleaner
     {
