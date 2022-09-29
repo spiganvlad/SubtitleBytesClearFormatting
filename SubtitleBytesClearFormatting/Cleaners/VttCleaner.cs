@@ -3,17 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace SubtitleBytesClearFormatting.Cleaner
+namespace SubtitleBytesClearFormatting.Cleaners
 {
-    public class VttCleaner : SubtitleFormatCleaner, ISubtitleCleaner, ISubtitleCleanerAsync
+    public class VttCleaner : SubtitleFormatCleaner
     {
         private static readonly IReadOnlyCollection<byte> timingTargetBytes;
 
-        /// <summary>
-        /// Creates an instance of the class
-        /// </summary>
-        /// <param name="subtitleTextBytes">Bytes representing vtt structures and text after them</param>
-        public VttCleaner(byte[] subtitleTextBytes) : base(subtitleTextBytes) { }
+        public VttCleaner() { }
 
         static VttCleaner()
         {
@@ -25,33 +21,34 @@ namespace SubtitleBytesClearFormatting.Cleaner
         /// <summary>
         /// Extracts and returns bytes after vtt formatting structures
         /// </summary>
+        /// <param name="subtitleBytes">Bytes representing vtt subtitle structures</param>
         /// <returns>Returns extracted bytes</returns>
-        public override byte[] DeleteFormatting()
+        public override List<byte> DeleteFormatting(byte[] subtitleBytes)
         {
-            if (TextWithoutFormatting.Count > 0)
-                return TextWithoutFormatting.ToArray();
-
-            for (int i = 0; i < SubtitleTextBytes.Count; i++)
+            if (subtitleBytes == null)
+                throw new ArgumentNullException(nameof(subtitleBytes), "Vtt subtitle bytes cannot be null.");
+            var deformattedBytes = new List<byte>();
+            
+            for (int i = 0; i < subtitleBytes.Length; i++)
             {
-                if (IsTiming(ref i))
+                if (IsTiming(subtitleBytes, ref i))
                 {
-                    AddUntilEmptyLine(ref i);
+                    AddUntilEmptyLine(subtitleBytes, deformattedBytes, ref i);
                 }
             }
 
-            return TextWithoutFormatting.ToArray();
+            return deformattedBytes;
         }
 
         /// <summary>
         /// Extracts and returns bytes after vtt formatting structures in async mode
         /// </summary>
+        /// <param name="subtitleBytes">Bytes representing vtt subtitle structures</param>
         /// <returns>Returns extracted bytes</returns>
-        public override async Task<byte[]> DeleteFormattingAsync()
-        {
-            return await base.DeleteFormattingAsync();
-        }
+        public override async Task<List<byte>> DeleteFormattingAsync(byte[] subtitleBytes) =>
+            await Task.Run(() => DeleteFormatting(subtitleBytes));
 
-        private bool IsTiming(ref int startpoint)
+        private bool IsTiming(byte[] initialBytes, ref int startpoint)
         {
             // Bytes of key: 45 = -, 62 = >
             int timingLineCount = 0;
@@ -61,56 +58,57 @@ namespace SubtitleBytesClearFormatting.Cleaner
             // Checking timing path
             do
             {
-                if (SubtitleTextBytes[startpoint] == 45)
+                if (initialBytes[startpoint] == 45)
                 {
                     timingLineCount++;
                     continue;
                 }
-                if (SubtitleTextBytes[startpoint] == 62)
+                if (initialBytes[startpoint] == 62)
                 {
                     timingPointerCount++;
                     continue;
                 }
-                if (SubtitleTextBytes[startpoint] == 32)
+                if (initialBytes[startpoint] == 32)
                 {
                     spaceByteCount++;
                     if (spaceByteCount > 2)
                     {
-                        ScrollToLineEnd(ref startpoint);
+                        ScrollToLineEnd(initialBytes, ref startpoint);
                         break;
                     }
                     continue;
                 }
-                if (SubtitleTextBytes[startpoint] == 13)
+                if (initialBytes[startpoint] == 13)
                 {
-                    if (startpoint + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[startpoint + 1] == 10)
+                    if (startpoint + 1 < initialBytes.Length && initialBytes[startpoint + 1] == 10)
                         startpoint++;
                     break;
                 }
-                if (SubtitleTextBytes[startpoint] == 10)
+                if (initialBytes[startpoint] == 10)
                     break;
 
-                if (!timingTargetBytes.Contains(SubtitleTextBytes[startpoint]))
+                if (!timingTargetBytes.Contains(initialBytes[startpoint]))
                     return false;
-            } while (++startpoint < SubtitleTextBytes.Count);
+            } while (++startpoint < initialBytes.Length);
 
             // Checking key (key = '-' '-' '>' or 45 45 62)
             if (timingLineCount == 2 && timingPointerCount == 1)
             {
                 return true;
             }
+
             return false;
         }
 
-        private void ScrollToLineEnd(ref int startpoint)
+        private void ScrollToLineEnd(byte[] initialBytes, ref int startpoint)
         {
-            while (++startpoint < SubtitleTextBytes.Count)
+            while (++startpoint < initialBytes.Length)
             {
-                if (SubtitleTextBytes[startpoint] == 10)
+                if (initialBytes[startpoint] == 10)
                     break;
-                if (SubtitleTextBytes[startpoint] == 13)
+                if (initialBytes[startpoint] == 13)
                 {
-                    if (startpoint + 1 < SubtitleTextBytes.Count && SubtitleTextBytes[startpoint + 1] == 10)
+                    if (startpoint + 1 < initialBytes.Length && initialBytes[startpoint + 1] == 10)
                         startpoint++;
                     break;
                 }
