@@ -5,7 +5,7 @@ using Xunit;
 using SubtitleBytesClearFormatting.Cleaners;
 using SubtitleBytesClearFormattingTest.Helpers;
 
-namespace SubtitleBytesLibraryTests
+namespace SubtitleBytesClearFormattingTest
 {
     public class SbvCleanerTests
     {
