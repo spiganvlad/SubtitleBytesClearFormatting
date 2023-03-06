@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/spiganvlad/SubtitleBytesClearFormatting</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>.Net 5 library that allows to extract bytes after subtitle formatting structures and to remove bytes representing subtitle tags</Description>
-	<PackageReleaseNotes>For a full overview of the changes, visit https://github.com/spiganvlad/SubtitleBytesClearFormatting/releases</PackageReleaseNotes>
+    <PackageReleaseNotes>For a full overview of the changes, visit https://github.com/spiganvlad/SubtitleBytesClearFormatting/releases</PackageReleaseNotes>
     <PackageTags>SubtitleBytesClearFormatting, Subtitles, SubtitleTags, Extraction</PackageTags>
     <Copyright>Copyright</Copyright>
   </PropertyGroup>
@@ -25,13 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="SubtitleTags\AssTags.xml">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SubtitleTags\BasicTags.xml">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</EmbeddedResource>
-    <EmbeddedResource Include="SubtitleTags\SubTags.xml">
+    <EmbeddedResource Include="SubtitleTags\**">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
