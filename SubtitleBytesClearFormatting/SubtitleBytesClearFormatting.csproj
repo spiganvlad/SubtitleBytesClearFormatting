@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -9,9 +9,11 @@
     <PackageId>SubtitleBytesClearFormatting</PackageId>
     <PackageVersion>5.0.0</PackageVersion>
     <Authors>Vladislav Shpiganovich</Authors>
-    <PackageLicenseUrl>https://github.com/spiganvlad/SubtitleBytesClearFormatting/blob/master/LICENSE.md</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/spiganvlad/SubtitleBytesClearFormatting</RepositoryUrl>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/spiganvlad/SubtitleBytesClearFormatting</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/spiganvlad/SubtitleBytesClearFormatting</RepositoryUrl>
     <Description>.Net 5 library that allows to extract bytes after subtitle formatting structures and to remove bytes representing subtitle tags</Description>
     <PackageReleaseNotes>For a full overview of the changes, visit https://github.com/spiganvlad/SubtitleBytesClearFormatting/releases</PackageReleaseNotes>
     <PackageTags>SubtitleBytesClearFormatting, Subtitles, SubtitleTags, Extraction</PackageTags>
@@ -19,12 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SubtitleTags\AssTags.xml" />
-    <None Remove="SubtitleTags\BasicTags.xml" />
-    <None Remove="SubtitleTags\SubTags.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <None Include="..\LICENSE.md" Pack="true" PackagePath="\"/>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
     <EmbeddedResource Include="SubtitleTags\**">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
